@@ -4,16 +4,6 @@ provider "aws" {
   region = "eu-west-1"
 }
 
-resource "aws_security_group" "instance" {
-  name = "terrafrom-example-instance"
-  ingress {
-    from_port   = var.server_port
-    to_port     = var.server_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 resource "aws_instance" "instance1" {
   ami                    = "ami-f90a4880"
   instance_type          = "t2.micro"
@@ -22,7 +12,7 @@ resource "aws_instance" "instance1" {
 		echo "Hello, World 1" > index.html
 		nohup busybox httpd -f -p var.server_port &
 	EOF 
-  vpc_security_group_ids = [aws_security_group.instance.id]
+  vpc_security_group_ids = [aws_security_group.elb.id]
   tags = {
     Name = "terraform-example"
   }
@@ -36,7 +26,7 @@ resource "aws_instance" "instance2" {
 		echo "Hello, World 2" > index.html
 		nohup busybox httpd -f -p var.server_port &
 	EOF 
-  vpc_security_group_ids = [aws_security_group.instance.id]
+  vpc_security_group_ids = [aws_security_group.elb.id]
   tags = {
     Name = "terraform-example"
   }
