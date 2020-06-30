@@ -10,7 +10,7 @@ resource "aws_instance" "instance1" {
   user_data              = <<-EOF
 		#!/bin/bash
 		echo "Hello, World 1" > index.html
-		nohup busybox httpd -f -p var.server_port &
+		nohup busybox httpd -f -p "${var.server_port}" &
 	EOF 
   vpc_security_group_ids = [aws_security_group.instance.id]
   tags = {
@@ -24,7 +24,7 @@ resource "aws_instance" "instance2" {
   user_data              = <<-EOF
 		#!/bin/bash
 		echo "Hello, World 2" > index.html
-		nohup busybox httpd -f -p var.server_port &
+		nohup busybox httpd -f -p "${var.server_port}" &
 	EOF 
   vpc_security_group_ids = [aws_security_group.instance.id]
   tags = {
@@ -35,8 +35,8 @@ resource "aws_instance" "instance2" {
 resource "aws_security_group" "instance" {
   name = "terrafrom-example-instance"
   ingress {
-    from_port   = var.server_port
-    to_port     = var.server_port
+    from_port   = "${var.server_port}"
+    to_port     = "${var.server_port}"
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
