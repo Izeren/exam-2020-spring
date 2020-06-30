@@ -12,7 +12,7 @@ resource "aws_instance" "instance1" {
 		echo "Hello, World 1" > index.html
 		nohup busybox httpd -f -p var.server_port &
 	EOF 
-  vpc_security_group_ids = [aws_security_group.elb.id]
+  vpc_security_group_ids = [aws_security_group.instance.id]
   tags = {
     Name = "terraform-example"
   }
@@ -26,21 +26,37 @@ resource "aws_instance" "instance2" {
 		echo "Hello, World 2" > index.html
 		nohup busybox httpd -f -p var.server_port &
 	EOF 
-  vpc_security_group_ids = [aws_security_group.elb.id]
+  vpc_security_group_ids = [aws_security_group.instance.id]
   tags = {
     Name = "terraform-example"
   }
 }
 
+resource "aws_security_group" "instance" {
+  name = "terrafrom-example-instance"
+  ingress {
+    from_port   = var.server_port
+    to_port     = var.server_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 variable "server_port" {
   description = "Server port for HTTP requests"
-  default     = 80
+  default     = 8080
 }
 
 resource "aws_elb" "example" {
   name               = "terraform-elb-example"
   availability_zones = data.aws_availability_zones.all.names
-  security_groups    = [aws_security_group.elb.id]
+  security_groups    = [aws_security_group.elb.id, aws_security_group.instance.id]
   instances = [aws_instance.instance1.id, aws_instance.instance2.id]
 
   health_check {
